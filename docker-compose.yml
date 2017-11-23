@@ -1,0 +1,13 @@
+version: '3'
+services:
+    nginx:
+        build: docker/nginx
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/app
+    php:
+        build: docker/php-fpm
+        volumes:
+            - ./:/app
+        working_dir: /app
