@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Service\PhantomjsService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\RichText;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,9 +48,49 @@ class DefaultController extends Controller
             $phantomjsService = new PhantomjsService($params);
             $output = $phantomjsService->run();
         } catch (ProcessFailedException $pe) {
-
+            return new Response($pe->getMessage());
         }
 
-        return new Response('ok');
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getProperties()
+            ->setCreator($params['username'])
+            ->setLastModifiedBy($params['username'])
+            ->setTitle('Employees report '.$params['year'].'-'.$params['month'])
+            ->setCategory('HR');
+
+        $spreadsheet->setActiveSheetIndex(0)
+            ->mergeCells('A1:A2')
+            ->setCellValue('A1', $this->formatHeaderText('Name'))
+            ->setCellValue('B1', $this->formatHeaderText('Day 1'))
+            ->setCellValue('C1', $this->formatHeaderText('Day 2'));
+        $spreadsheet->getActiveSheet()->setTitle('Report');
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = $params['month'].'_pontaj_g'.(new \DateTime())->format('YmdHis').'.xlsx';
+        $tmpFile =  '/tmp/'.$filename;
+        $writer->save($tmpFile);
+
+        return new Response(
+            file_get_contents($tmpFile),
+            200,
+            [
+                'Content-Type' => 'application/vnd.ms-excel',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"'
+            ]
+        );
+    }
+
+    /**
+     * @param string $text
+     * @return RichText
+     */
+    protected function formatHeaderText(string $text)
+    {
+        $richText = new RichText();
+        $richText->createText('');
+        $headerText = $richText->createTextRun($text);
+        $headerText->getFont()->setBold(true);
+
+        return $richText;
     }
 }

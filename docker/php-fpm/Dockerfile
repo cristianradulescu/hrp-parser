@@ -12,6 +12,8 @@ RUN apt-get update \
 
 RUN apt-get install -y git
 RUN apt-get install -y fontconfig
+RUN apt-get install -y libzip-dev \
+  && pecl install zip && docker-php-ext-enable zip
 
 COPY php-fpm.conf /etc/php-fpm.conf
 COPY php.ini /usr/local/etc/php/php.ini
