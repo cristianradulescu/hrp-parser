@@ -160,5 +160,8 @@
             "version": "3.3",
             "ref": "de31e687f3964939abd1f66817bd96ed34bc2eee"
         }
+    },
+    "twbs/bootstrap": {
+        "version": "v4.0.0-beta.2"
     }
 }

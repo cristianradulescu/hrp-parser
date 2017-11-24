@@ -13,7 +13,8 @@
         "symfony/maker-bundle": "dev-master",
         "symfony/process": "^4.0@beta",
         "symfony/twig-bundle": "^4.0@beta",
-        "symfony/yaml": "^4.0"
+        "symfony/yaml": "^4.0",
+        "twbs/bootstrap": "4.0.0-beta.2"
     },
     "require-dev": {
         "symfony/dotenv": "^4.0"
@@ -44,7 +45,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "add-bootstrap": "ln -s $(pwd)/vendor/twbs/bootstrap/dist/ public/bootstrap"
     },
     "conflict": {
         "symfony/symfony": "*"
