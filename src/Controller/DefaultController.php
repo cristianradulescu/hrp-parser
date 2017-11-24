@@ -16,7 +16,18 @@ class DefaultController extends Controller
      */
     public function index()
     {
-        return $this->render('index.html.twig', ['title' => 'Pontaj']);
+        return $this->render(
+            'index.html.twig',
+            [
+                'title' => 'HRP parser',
+                'label_user' => 'User',
+                'label_password' => 'Password',
+                'label_company' => 'Company',
+                'label_year' => 'Year',
+                'label_month' => 'Month',
+                'label_submit' => 'Export'
+            ]
+        );
     }
 
     /**
