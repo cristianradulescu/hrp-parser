@@ -163,5 +163,8 @@
     },
     "twbs/bootstrap": {
         "version": "v4.0.0-beta.2"
+    },
+    "phpoffice/phpspreadsheet": {
+        "version": "1.0.0-beta"
     }
 }
