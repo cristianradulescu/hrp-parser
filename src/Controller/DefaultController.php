@@ -54,7 +54,8 @@ class DefaultController extends Controller
             ->setTitle('Employees report '.$params['year'].'-'.$params['month'])
             ->setCategory('HR')
             ->setYear($params['year'])
-            ->setMonth($params['month']);
+            ->setMonth($params['month'])
+            ->setContent($output);
         $spreadsheetService->generateSpreadsheet();
         $tmpFile = $spreadsheetService->writeSpreadsheetFile();
 

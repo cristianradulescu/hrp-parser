@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\RichText;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
 /**
@@ -18,14 +20,38 @@ class SpreadsheetService
      */
     protected $spreadsheet;
 
+    /**
+     * @var array
+     */
+    protected $content = array();
+
+    /**
+     * @var string
+     */
     protected $filename = '';
 
+    /**
+     * @var string
+     */
     protected $creator = '';
     protected $title = '';
     protected $category = '';
 
+    /**
+     * @var int
+     */
     protected $year = 2017;
     protected $month = 1;
+
+    /**
+     * @param array $content
+     * @return SpreadsheetService
+     */
+    public function setContent(array $content): SpreadsheetService
+    {
+        $this->content = $content;
+        return $this;
+    }
 
     /**
      * @param string $creator
@@ -85,18 +111,53 @@ class SpreadsheetService
             ->setLastModifiedBy($this->creator)
             ->setTitle($this->title)
             ->setCategory($this->category);
-        $this->spreadsheet->setActiveSheetIndex(0)
-            ->mergeCells('A1:A2')
-            ->setCellValue('A1', $this->formatHeaderText('Name'))
-            ->setCellValue('B1', $this->formatHeaderText('Day 1'))
-            ->setCellValue('C1', $this->formatHeaderText('Day 2'));
-        $this->spreadsheet->getActiveSheet()->setTitle('Report');
+
+        try {
+            $this->spreadsheet->setActiveSheetIndex(0);
+            $activeSheet = $this->spreadsheet->getActiveSheet();
+            $activeSheet->setTitle('Report');
+
+            /**
+             * "Name" column
+             * --------------
+             * - Merge A1:A2
+             * - Center vertically and horizontally
+             * - AutoFill column width
+             * - Apply "Header text" style
+             */
+            $activeSheet->mergeCells('A1:A2')
+                ->getStyle('A1')
+                ->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $activeSheet->getColumnDimension('A')->setAutoSize(true);
+            $activeSheet->setCellValue('A1', $this->formatHeaderText('Name'));
+
+            // A1 and A2 are merged, start from A3
+            $cellStartIndex = 3;
+            foreach ($this->content as $userRow) {
+                $activeSheet->setCellValue('A'.$cellStartIndex, $userRow[0]);
+                $cellStartIndex++;
+            }
+
+            /**
+             * @todo: "Day" column
+             * --------------
+             * - Row #1: Merge B1:E2 / [Monday, 11-Dec]
+             * - Row #2: [In][Out][Break][Total]
+             * - Center vertically and horizontally
+             * - Apply "Header text" style
+             */
+
+        } catch (Exception $e) {
+        }
 
         return $this->spreadsheet;
     }
 
     /**
      * @return string
+     * @throws WriterException
      */
     public function writeSpreadsheetFile()
     {
@@ -122,6 +183,7 @@ class SpreadsheetService
     /**
      * @param string $text
      * @return RichText
+     * @throws Exception
      */
     protected function formatHeaderText(string $text)
     {
