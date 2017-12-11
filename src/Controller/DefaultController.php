@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\PhantomjsService;
 use App\Service\SpreadsheetService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -42,8 +43,8 @@ class DefaultController extends Controller
         $params[] = $this->getParameter('hrp_domain');
 
         try {
-//            $phantomjsService = new PhantomjsService($params);
-//            $output = $phantomjsService->run();
+            $phantomjsService = new PhantomjsService($params);
+            $output = $phantomjsService->run($_SERVER['HRP_SIMULATE_REQUEST']);
         } catch (ProcessFailedException $pe) {
             return new Response($pe->getMessage());
         }
