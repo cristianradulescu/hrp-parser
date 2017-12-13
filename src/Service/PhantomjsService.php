@@ -30,13 +30,16 @@ class PhantomjsService
     }
 
     /**
-     * @param bool $simulated By default return a dummy response
+     * @param bool $simulated Return a dummy response if set to TRUE.
      * @throws ProcessFailedException
      * @return array
      */
-    public function run(bool $simulated = true)
+    public function run(bool $simulated = false)
     {
         if ($simulated) {
+            /**
+             * Warning: the test file contains data for Oct-2017
+             */
             $jsonContent = file_get_contents(__DIR__.'/../Resources/response/hrp.json');
             return json_decode($jsonContent, true);
         }

@@ -43,6 +43,40 @@ class SpreadsheetService
     protected $year = 2017;
     protected $month = 1;
 
+    protected $dateColumnGroups = [
+        1 => ['B', 'C', 'D', 'E'],
+        2 => ['F', 'G', 'H', 'I'],
+        3 => ['J', 'K', 'L', 'M'],
+        4 => ['N', 'O', 'P', 'Q'],
+        5 => ['R', 'S', 'T', 'U'],
+        6 => ['V', 'W', 'X', 'Y'],
+        7 => ['Z', 'AA', 'AB', 'AC'],
+        8 => ['AD', 'AE', 'AF', 'AG'],
+        9 => ['AH', 'AI', 'AJ', 'AK'],
+        10 =>['AL', 'AM', 'AN', 'AO'],
+        11 =>['AP', 'AQ', 'AR', 'AS'],
+        12 =>['AT', 'AU', 'AV', 'AW'],
+        13 => ['AX', 'AY', 'AZ', 'BA'],
+        14 => ['BB', 'BC', 'BD', 'BE'],
+        15 => ['BF', 'BG', 'BH', 'BI'],
+        16 => ['BJ', 'BK', 'BL', 'BM'],
+        17 => ['BN', 'BO', 'BP', 'BQ'],
+        18 => ['BR', 'BS', 'BT', 'BU'],
+        19 => ['BV', 'BW', 'BX', 'BY'],
+        20 => ['BZ', 'CA', 'CB', 'CC'],
+        21 => ['CD', 'CE', 'CF', 'CG'],
+        22 => ['CH', 'CI', 'CJ', 'CK'],
+        23 => ['CL', 'CM', 'CN', 'CO'],
+        24 => ['CP', 'CQ', 'CR', 'CS'],
+        25 => ['CT', 'CU', 'CV', 'CW'],
+        26 => ['CX', 'CY', 'CZ', 'DA'],
+        27 => ['DB', 'DC', 'DD', 'DE'],
+        28 => ['DF', 'DG', 'DH', 'DI'],
+        29 => ['DJ', 'DK', 'DL', 'DM'],
+        30 => ['DN', 'DO', 'DP', 'DQ'],
+        31 => ['DR', 'DS', 'DT', 'DU'],
+    ];
+
     /**
      * @param array $content
      * @return SpreadsheetService
@@ -118,12 +152,13 @@ class SpreadsheetService
             $activeSheet->setTitle('Report');
 
             /**
-             * "Name" column
+             * "Name" header
              * --------------
              * - Merge A1:A2
              * - Center vertically and horizontally
              * - AutoFill column width
              * - Apply "Header text" style
+             * - TODO: Freeze column
              */
             $activeSheet->mergeCells('A1:A2')
                 ->getStyle('A1')
@@ -133,21 +168,51 @@ class SpreadsheetService
             $activeSheet->getColumnDimension('A')->setAutoSize(true);
             $activeSheet->setCellValue('A1', $this->formatHeaderText('Name'));
 
-            // A1 and A2 are merged, start from A3
-            $cellStartIndex = 3;
-            foreach ($this->content as $userRow) {
-                $activeSheet->setCellValue('A'.$cellStartIndex, $userRow[0]);
-                $cellStartIndex++;
-            }
-
             /**
-             * @todo: "Day" column
+             * "Day" header
              * --------------
-             * - Row #1: Merge B1:E2 / [Monday, 11-Dec]
+             * - Row #1: Merge B1:E1 / [Friday, 1-Dec]
              * - Row #2: [In][Out][Break][Total]
              * - Center vertically and horizontally
              * - Apply "Header text" style
              */
+            $nbOfDaysInMonth = (new \DateTime($this->year.'-'.$this->month.'-01'))->format('t');
+            for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
+                $activeSheet->mergeCells($this->dateColumnGroups[$index][0].'1:'.$this->dateColumnGroups[$index][3].'1')
+                    ->getStyle($this->dateColumnGroups[$index][0].'1')
+                    ->getAlignment()
+                    ->setVertical(Alignment::VERTICAL_CENTER)
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $activeSheet->setCellValue(
+                    $this->dateColumnGroups[$index][0].'1',
+                    $this->formatHeaderText(
+                        (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
+                    )
+                );
+                $activeSheet->setCellValue($this->dateColumnGroups[$index][0].'2', $this->formatHeaderText('In'));
+                $activeSheet->setCellValue($this->dateColumnGroups[$index][1].'2', $this->formatHeaderText('Out'));
+                $activeSheet->setCellValue($this->dateColumnGroups[$index][2].'2', $this->formatHeaderText('Break'));
+                $activeSheet->setCellValue($this->dateColumnGroups[$index][3].'2', $this->formatHeaderText('Total'));
+            }
+
+            /**
+             * Data
+             */
+            // Rows #1 and #2 are used as header, start from row #3
+            $cellStartIndex = 3;
+            foreach ($this->content as $userRow) {
+                // Name
+                $name = array_shift($userRow);
+                $activeSheet->setCellValue('A'.$cellStartIndex, $name);
+
+                // day entries
+                foreach ($userRow as $key => $value) {
+                    $activeSheet->setCellValue($this->dateColumnGroups[$key+1][3].$cellStartIndex, $value);
+
+                }
+
+                $cellStartIndex++;
+            }
 
         } catch (Exception $e) {
         }
@@ -162,7 +227,7 @@ class SpreadsheetService
     public function writeSpreadsheetFile()
     {
         $writer = IOFactory::createWriter($this->spreadsheet, 'Xlsx');
-        $tmpFile = '/tmp/' . $this->getFilename();
+        $tmpFile = '/tmp/'.$this->getFilename();
         $writer->save($tmpFile);
 
         return $tmpFile;
@@ -174,7 +239,9 @@ class SpreadsheetService
     public function getFilename()
     {
         if ('' === $this->filename) {
-            $this->filename = 'pontaj_g' . (new \DateTime())->format('YmdHis') . '.xlsx';
+            $this->filename = $this->creator
+                .'-'.$this->year.'-'.$this->month.'_'
+                .(new \DateTime())->format('YmdHis').'.xlsx';
         }
 
         return $this->filename;
