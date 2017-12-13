@@ -45,19 +45,21 @@ class DefaultController extends Controller
         try {
             $phantomjsService = new PhantomjsService($params);
             $output = $phantomjsService->run($_SERVER['HRP_SIMULATE_REQUEST']);
-        } catch (ProcessFailedException $pe) {
-            return new Response($pe->getMessage());
-        }
 
-        $spreadsheetService = (new SpreadsheetService())
-            ->setCreator($params['username'])
-            ->setTitle('Employees report '.$params['year'].'-'.$params['month'])
-            ->setCategory('HR')
-            ->setYear($params['year'])
-            ->setMonth($params['month'])
-            ->setContent($output);
-        $spreadsheetService->generateSpreadsheet();
-        $tmpFile = $spreadsheetService->writeSpreadsheetFile();
+            $spreadsheetService = (new SpreadsheetService())
+                ->setCreator($params['username'])
+                ->setTitle('Employees report '.$params['year'].'-'.$params['month'])
+                ->setCategory('HR')
+                ->setYear($params['year'])
+                ->setMonth($params['month'])
+                ->setContent($output);
+            $spreadsheetService->generateSpreadsheet();
+            $tmpFile = $spreadsheetService->writeSpreadsheetFile();
+        } catch (ProcessFailedException $pe) {
+            return new Response('An error occurred while trying to get data from external domain. '.$pe->getMessage());
+        } catch (\Exception $e) {
+            return new Response('An error occurred during th export process. '.$e->getMessage());
+        }
 
         return new Response(
             file_get_contents($tmpFile),
@@ -68,6 +70,4 @@ class DefaultController extends Controller
             ]
         );
     }
-
-
 }
