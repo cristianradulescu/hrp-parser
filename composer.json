@@ -43,7 +43,7 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
-            "add-bootstrap"
+            "@add-bootstrap"
         ],
         "post-update-cmd": [
             "@auto-scripts"
