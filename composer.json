@@ -46,9 +46,10 @@
             "@add-bootstrap"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "@add-bootstrap"
         ],
-        "add-bootstrap": "mkdir public/bootstrap; ln -s $(pwd)/vendor/twbs/bootstrap/dist/ public/bootstrap/dist; ln -s $(pwd)/vendor/twbs/bootstrap/assets/ public/bootstrap/assets;"
+        "add-bootstrap": "mkdir -p public/bootstrap; cp -r $(pwd)/vendor/twbs/bootstrap/dist/ public/bootstrap/dist; cp -r $(pwd)/vendor/twbs/bootstrap/assets/ public/bootstrap/assets;"
     },
     "conflict": {
         "symfony/symfony": "*"
