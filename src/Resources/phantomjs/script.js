@@ -8,7 +8,7 @@ var username = system.args[1],
     year = system.args[4],
     month = system.args[5],
     domain = system.args[6],
-    timeout = 1000,
+    timeout = 500,
     token = '',
     pontaj = [];
 
@@ -198,12 +198,36 @@ function getPontajDayValue(pontajDay)
         return 'EVD';
     }
 
+    if (pontajDay.TCO_ID == 3) {
+        return 'CFS';
+    }
+
+    if (pontajDay.TCO_ID == 4) {
+        return 'ST';
+    }
+
+    if (pontajDay.TCO_ID == 8) {
+        return 'CSFP';
+    }
+
+    if (pontajDay.TCO_ID == 9) {
+        return 'CSP';
+    }
+
     if (pontajDay.ELM_ID == 20) {
         return 'ZN';
     }
 
     if (pontajDay.ELM_ID == 39) {
         return 'CM';
+    }
+
+    if (pontajDay.ELM_ID == 82) {
+        return 'ZLP';
+    }
+
+    if (pontajDay.ELM_ID == 95) {
+        return 'WFH';
     }
 }
 
