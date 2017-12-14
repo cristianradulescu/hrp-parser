@@ -7,6 +7,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\RichText;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
 /**
@@ -150,72 +151,12 @@ class SpreadsheetService
             ->setTitle($this->title)
             ->setCategory($this->category);
 
-        $this->spreadsheet->setActiveSheetIndex(0);
+        $this->spreadsheet->setActiveSheetIndex(0)
+            ->setTitle('Report');
         $activeSheet = $this->spreadsheet->getActiveSheet();
-        $activeSheet->setTitle('Report');
 
-        /**
-         * "Name" header
-         * --------------
-         * - Merge A1:A2
-         * - Center vertically and horizontally
-         * - AutoFill column width
-         * - Apply "Header text" style
-         * - TODO: Freeze column
-         */
-        $activeSheet->mergeCells('A1:A2')
-            ->getStyle('A1')
-            ->getAlignment()
-            ->setVertical(Alignment::VERTICAL_CENTER)
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $activeSheet->getColumnDimension('A')->setAutoSize(true);
-        $activeSheet->setCellValue('A1', $this->formatHeaderText('Name'));
-
-        /**
-         * "Day" header
-         * --------------
-         * - Row #1: Merge B1:E1 / [Friday, 1-Dec]
-         * - Row #2: [In][Out][Break][Total]
-         * - Center vertically and horizontally
-         * - Apply "Header text" style
-         */
-        $nbOfDaysInMonth = (new \DateTime($this->year.'-'.$this->month.'-01'))->format('t');
-        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
-            $activeSheet->mergeCells($this->dateColumnGroups[$index][0].'1:'.$this->dateColumnGroups[$index][3].'1')
-                ->getStyle($this->dateColumnGroups[$index][0].'1')
-                ->getAlignment()
-                ->setVertical(Alignment::VERTICAL_CENTER)
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $activeSheet->setCellValue(
-                $this->dateColumnGroups[$index][0].'1',
-                $this->formatHeaderText(
-                    (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
-                )
-            );
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][0].'2', $this->formatHeaderText('In'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][1].'2', $this->formatHeaderText('Out'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][2].'2', $this->formatHeaderText('Break'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][3].'2', $this->formatHeaderText('Total'));
-        }
-
-        /**
-         * Data
-         */
-        // Rows #1 and #2 are used as header, start from row #3
-        $cellStartIndex = 3;
-        foreach ($this->content as $userRow) {
-            // Name
-            $name = array_shift($userRow);
-            $activeSheet->setCellValue('A'.$cellStartIndex, $name);
-
-            // day entries
-            foreach ($userRow as $key => $value) {
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][3].$cellStartIndex, $value);
-
-            }
-
-            $cellStartIndex++;
-        }
+        $this->createTableHeader($activeSheet);
+        $this->createTableContent($activeSheet);
 
         return $this->spreadsheet;
     }
@@ -260,5 +201,104 @@ class SpreadsheetService
         $headerText->getFont()->setBold(true);
 
         return $richText;
+    }
+
+    /**
+     * @param Worksheet $activeSheet
+     * @throws Exception
+     */
+    protected function createTableHeader(Worksheet $activeSheet)
+    {
+        /**
+         * "Name" header
+         * --------------
+         * - Merge A1:A2
+         * - Center vertically and horizontally
+         * - AutoFill column width
+         * - Apply "Header text" style
+         * - TODO: Freeze column
+         */
+        $activeSheet->mergeCells('A1:A2')
+            ->getStyle('A1')
+            ->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $activeSheet->getColumnDimension('A')->setAutoSize(true);
+        $activeSheet->setCellValue('A1', $this->formatHeaderText('Name'));
+
+        /**
+         * "Day" header
+         * --------------
+         * - Row #1: Merge B1:E1 / [Friday, 1-Dec]
+         * - Row #2: [In][Out][Break][Total]
+         * - Center vertically and horizontally
+         * - Apply "Header text" style
+         */
+        $nbOfDaysInMonth = (new \DateTime($this->year.'-'.$this->month.'-01'))->format('t');
+        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
+            $activeSheet->mergeCells($this->dateColumnGroups[$index][0].'1:'.$this->dateColumnGroups[$index][3].'1')
+                ->getStyle($this->dateColumnGroups[$index][0].'1')
+                ->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $activeSheet->setCellValue(
+                $this->dateColumnGroups[$index][0].'1',
+                $this->formatHeaderText(
+                    (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
+                )
+            );
+            $activeSheet->setCellValue($this->dateColumnGroups[$index][0].'2', $this->formatHeaderText('In'));
+            $activeSheet->setCellValue($this->dateColumnGroups[$index][1].'2', $this->formatHeaderText('Out'));
+            $activeSheet->setCellValue($this->dateColumnGroups[$index][2].'2', $this->formatHeaderText('Break'));
+            $activeSheet->setCellValue($this->dateColumnGroups[$index][3].'2', $this->formatHeaderText('Total'));
+        }
+    }
+
+    /**
+     * @param Worksheet $activeSheet
+     */
+    protected function createTableContent(Worksheet $activeSheet)
+    {
+        // Rows #1 and #2 are used as header, start from row #3
+        $cellStartIndex = 3;
+        foreach ($this->content as $userRow) {
+            // Name
+            $name = array_shift($userRow);
+            $activeSheet->setCellValue('A'.$cellStartIndex, $name);
+
+            // day entries
+            foreach ($userRow as $key => $value) {
+                // compute In / Out based on received number of worked hours
+                $dailyDetails = $this->computeDailyDetails((string)$value);
+                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][0].$cellStartIndex, $dailyDetails[0]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][1].$cellStartIndex, $dailyDetails[1]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][2].$cellStartIndex, $dailyDetails[2]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][3].$cellStartIndex, $dailyDetails[3]);
+            }
+
+            $cellStartIndex++;
+        }
+    }
+
+    /**
+     * @param string $workedHours
+     * @return array
+     */
+    protected function computeDailyDetails(string $workedHours)
+    {
+        if ('8' !== $workedHours) {
+            return ['-', '-', '-', $workedHours];
+        }
+
+        // compute start and end hours, wih a difference between 7h48m and 8h17m, +1 h break
+        $startHour = new \DateTime($this->year.'-'.$this->month.'-01 08:'.rand(32, 59));
+        $endHour = (clone $startHour)->add(new \DateInterval('PT'.rand(8*60+48, 9*60+17).'M'));
+
+        return [
+            $startHour->format('H:i'),
+            $endHour->format('H:i'),
+            '1h',
+            $endHour->diff($startHour)->format('%hh%im')
+        ];
     }
 }
