@@ -8,12 +8,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class DefaultController extends Controller
 {
     /**
      * @Route("/", name="default")
+     *
+     * @return Response
      */
     public function index()
     {
@@ -55,10 +56,8 @@ class DefaultController extends Controller
                 ->setContent($output);
             $spreadsheetService->generateSpreadsheet();
             $tmpFile = $spreadsheetService->writeSpreadsheetFile();
-        } catch (ProcessFailedException $pe) {
-            return new Response('An error occurred while trying to get data from external domain. '.$pe->getMessage());
         } catch (\Exception $e) {
-            return new Response('An error occurred during th export process. '.$e->getMessage());
+            return $this->returnError('Error: '.$e->getMessage());
         }
 
         return new Response(
@@ -69,5 +68,15 @@ class DefaultController extends Controller
                 'Content-Disposition' => 'attachment; filename="'.$spreadsheetService->getFilename().'"'
             ]
         );
+    }
+
+    /**
+     * @param string $message
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    protected function returnError(string $message = '')
+    {
+        $this->addFlash('error', $message);
+        return $this->redirectToRoute('default');
     }
 }

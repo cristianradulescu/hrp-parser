@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -31,17 +30,34 @@ class PhantomjsService
 
     /**
      * @param bool $simulated Return a dummy response if set to TRUE.
-     * @throws ProcessFailedException
+     * @throws \Exception
      * @return array
      */
     public function run(bool $simulated = false)
     {
+        $output = $this->getProcessOutput($simulated);
+        $outputArray = json_decode($output, true);
+
+        // if the json_decode doesn't return an array, throw the entire output since it should be an error
+        if (!is_array($outputArray)) {
+            throw new \Exception($output);
+        }
+
+        return $outputArray;
+    }
+
+    /**
+     * @param bool $simulated
+     * @return string
+     */
+    protected function getProcessOutput(bool $simulated = false)
+    {
         if ($simulated) {
             /**
-             * Warning: the test file contains data for Oct-2017
+             * Warning: the success response file contains data for Oct-2017
+             *
              */
-            $jsonContent = file_get_contents(__DIR__.'/../Resources/response/hrp.json');
-            return json_decode($jsonContent, true);
+            return file_get_contents(__DIR__.'/../Resources/response/hrp-success.json');
         }
 
         $process = new Process($this->command);
@@ -52,8 +68,6 @@ class PhantomjsService
             throw new ProcessFailedException($process);
         }
 
-        $output = json_decode($process->getOutput(), true);
-
-        return is_array($output) ? $output : array();
+        return $process->getOutput();
     }
 }

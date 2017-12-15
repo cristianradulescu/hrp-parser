@@ -63,7 +63,18 @@ function openPageLogin()
     setTimeout(function() {
         if (debugMsg) console.log('=> Login')
         loginPage.open(loginUrl, 'post', loginData, function (status) {
-            // TODO: determine is the login was successful
+
+            // Validate login
+            var loginErrorMessage = loginPage.evaluate(function() {
+                var errMsg = document.getElementById('TFA-validation-summary');
+                return errMsg != undefined ? errMsg.innerText : '';
+            });
+
+            if (loginErrorMessage != undefined) {
+                console.log(loginErrorMessage)
+                exitScript();
+            }
+
             openPageCompany();
         });
 
