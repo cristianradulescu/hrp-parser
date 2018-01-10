@@ -67,7 +67,7 @@ function openPageLogin()
             // Validate login
             var loginErrorMessage = loginPage.evaluate(function() {
                 var errMsg = document.getElementById('TFA-validation-summary');
-                return errMsg != undefined ? errMsg.innerText : '';
+                return errMsg != undefined ? errMsg.innerText : undefined;
             });
 
             if (loginErrorMessage != undefined) {
@@ -164,6 +164,7 @@ function processPontaj(pontajResponse)
     if (debugMsg) console.log('=> Process pontaj');
     if (pontajResponse.d == undefined) {
         console.log('Unexpected format detected for JSON response `pontajResponse.d`');
+        //console.log(JSON.stringify(pontajResponse, undefined, 2));
         exitScript();
     }
     if (pontajResponse.d.Employees == undefined) {
