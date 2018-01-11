@@ -7,7 +7,7 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
 
-    <title>{% block title %}{{ title }}{% endblock %}</title>
+    <title>{% block title %}{{ title|trans }}{% endblock %}</title>
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
 <body>
 
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#">// Employees report</a>
+    <a class="navbar-brand" href="#">// {{ title|trans }}</a>
 </nav>
 
 <main role="main" class="container">

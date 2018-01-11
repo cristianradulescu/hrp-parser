@@ -6,8 +6,10 @@ use App\Service\PhantomjsService;
 use App\Service\SpreadsheetService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class DefaultController extends Controller
 {
@@ -21,13 +23,14 @@ class DefaultController extends Controller
         return $this->render(
             'index.html.twig',
             [
-                'title' => 'HRP parser',
-                'label_user' => 'User',
-                'label_password' => 'Password',
-                'label_company' => 'Company',
-                'label_year' => 'Year',
-                'label_month' => 'Month',
-                'label_submit' => 'Export'
+                'title' => 'page.title',
+                'label_user' => 'form.label_user',
+                'label_password' => 'form.label_password',
+                'label_company' => 'form.label_company',
+                'label_year' => 'form.label_year',
+                'label_month' => 'form.label_month',
+                'label_submit' => 'form.label_submit',
+                'form_info_required_fields' => 'form.info_required_fields'
             ]
         );
     }
@@ -36,9 +39,10 @@ class DefaultController extends Controller
      * @Route("/export", name="export", methods={"POST"})
      *
      * @param Request $request
-     * @return Response
+     * @param TranslatorInterface $translator
+     * @return RedirectResponse|Response
      */
-    public function export(Request $request)
+    public function export(Request $request, TranslatorInterface $translator)
     {
         $params = $request->request->all();
         $params[] = $this->getParameter('hrp_domain');
@@ -47,9 +51,11 @@ class DefaultController extends Controller
             $phantomjsService = new PhantomjsService($params);
             $output = $phantomjsService->run($_SERVER['HRP_SIMULATE_REQUEST']);
 
-            $spreadsheetService = (new SpreadsheetService())
+            $spreadsheetService = (new SpreadsheetService($translator))
                 ->setCreator($params['username'])
-                ->setTitle('Employees report '.$params['year'].'-'.$params['month'])
+                ->setTitle(
+                    $translator->trans('spreadsheet.title').' '.$params['year'].'-'.$params['month']
+                )
                 ->setCategory('HR')
                 ->setYear($params['year'])
                 ->setMonth($params['month'])
@@ -57,7 +63,8 @@ class DefaultController extends Controller
             $spreadsheetService->generateSpreadsheet();
             $tmpFile = $spreadsheetService->writeSpreadsheetFile();
         } catch (\Exception $e) {
-            return $this->returnError('Error: '.$e->getMessage());
+            return $this->returnError(
+                $translator->trans('page.error').': '.$e->getMessage());
         }
 
         return new Response(

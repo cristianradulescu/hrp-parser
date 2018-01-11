@@ -1,0 +1,20 @@
+page:
+  title: 'Raport activitate angajati'
+  error: 'Eroare'
+
+form:
+  label_user: 'Utilizator'
+  label_password: 'Parola'
+  label_company: 'Companie'
+  label_year: 'An'
+  label_month: 'Luna'
+  label_submit: 'Exporta'
+  info_required_fields: 'Campuri obligatorii'
+
+spreadsheet:
+  title: 'Raport angajati'
+  column_name: 'Nume'
+  column_in: 'Intrare'
+  column_out: 'Iesire'
+  column_break: 'Pauza'
+  column_total: 'Total'

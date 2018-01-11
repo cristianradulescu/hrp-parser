@@ -1,0 +1,20 @@
+page:
+  title: 'Employee timekeeping report'
+  error: 'Error'
+
+form:
+  label_user: 'User'
+  label_password: 'Password'
+  label_company: 'Company'
+  label_year: 'Year'
+  label_month: 'Month'
+  label_submit: 'Export'
+  info_required_fields: 'Required fields'
+
+spreadsheet:
+  title: 'Employees report'
+  column_name: 'Name'
+  column_in: 'In'
+  column_out: 'Out'
+  column_break: 'Break'
+  column_total: 'Total'

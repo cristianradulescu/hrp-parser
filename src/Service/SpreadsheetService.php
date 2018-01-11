@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class SpreadsheetService
@@ -77,6 +78,16 @@ class SpreadsheetService
         30 => ['DN', 'DO', 'DP', 'DQ'],
         31 => ['DR', 'DS', 'DT', 'DU'],
     ];
+
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
 
     /**
      * @param array $content
@@ -197,7 +208,7 @@ class SpreadsheetService
     {
         $richText = new RichText();
         $richText->createText('');
-        $headerText = $richText->createTextRun($text);
+        $headerText = $richText->createTextRun($this->translator->trans($text));
         $headerText->getFont()->setBold(true);
 
         return $richText;
@@ -224,7 +235,7 @@ class SpreadsheetService
             ->setVertical(Alignment::VERTICAL_CENTER)
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $activeSheet->getColumnDimension('A')->setAutoSize(true);
-        $activeSheet->setCellValue('A1', $this->formatHeaderText('Name'));
+        $activeSheet->setCellValue('A1', $this->formatHeaderText('spreadsheet.column_name'));
 
         /**
          * "Day" header
@@ -247,10 +258,22 @@ class SpreadsheetService
                     (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
                 )
             );
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][0].'2', $this->formatHeaderText('In'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][1].'2', $this->formatHeaderText('Out'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][2].'2', $this->formatHeaderText('Break'));
-            $activeSheet->setCellValue($this->dateColumnGroups[$index][3].'2', $this->formatHeaderText('Total'));
+            $activeSheet->setCellValue(
+                $this->dateColumnGroups[$index][0].'2',
+                $this->formatHeaderText('spreadsheet.column_in')
+            );
+            $activeSheet->setCellValue(
+                $this->dateColumnGroups[$index][1].'2',
+                $this->formatHeaderText('spreadsheet.column_out')
+            );
+            $activeSheet->setCellValue(
+                $this->dateColumnGroups[$index][2].'2',
+                $this->formatHeaderText('spreadsheet.column_break')
+            );
+            $activeSheet->setCellValue(
+                $this->dateColumnGroups[$index][3].'2',
+                $this->formatHeaderText('spreadsheet.column_total')
+            );
         }
     }
 
