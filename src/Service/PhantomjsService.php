@@ -25,6 +25,7 @@ class PhantomjsService
         $parameters = implode(' ', $parameters);
         $this->command = __DIR__.'/../../bin/phantomjs --cookies-file='
             .__DIR__.'/../../var/phcookies.txt '
+            .'--ignore-ssl-errors=true '
             .__DIR__.'/../Resources/phantomjs/script.js '.$parameters;
     }
 
