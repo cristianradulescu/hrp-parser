@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\Service\PhantomjsService;
-use App\Service\SpreadsheetService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,7 +21,7 @@ class DefaultController extends Controller
         return $this->render(
             'index.html.twig',
             [
-                'title' => 'page.title',
+                'title' => 'page.title_index',
                 'label_user' => 'form.label_user',
                 'label_password' => 'form.label_password',
                 'label_company' => 'form.label_company',
@@ -31,6 +29,68 @@ class DefaultController extends Controller
                 'label_month' => 'form.label_month',
                 'label_submit' => 'form.label_submit',
                 'form_info_required_fields' => 'form.info_required_fields'
+            ]
+        );
+    }
+
+    /**
+     * @Route("/export-confirm", name="export-confirm", methods={"POST"})
+     *
+     * @param Request $request
+     * @param TranslatorInterface $translator
+     * @return RedirectResponse|Response
+     */
+    public function exportConfirm(Request $request, TranslatorInterface $translator)
+    {
+        $params = $request->request->all();
+        $params[] = $this->getParameter('hrp_domain');
+
+        try {
+            $extractedContent = $this->get('App\Service\PhantomjsService')
+                ->run($_SERVER['HRP_SIMULATE_REQUEST']);
+
+        } catch (\Exception $e) {
+            return $this->returnError(
+                $translator->trans('page.error').': '.$e->getMessage());
+        }
+
+        $tableDateHeader = [];
+        $nbOfDaysInMonth = (new \DateTime($params['year'].'-'.$params['month'].'-01'))->format('t');
+        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
+            $tableDateHeader[] = (new \IntlDateFormatter(
+                $_SERVER['LOCALE'],
+                \IntlDateFormatter::MEDIUM,
+                \IntlDateFormatter::NONE)
+            )->format(new \DateTime($params['year'].'-'.$params['month'].'-'.$index));
+        }
+
+        $content = [];
+        $spreadsheetService = $this->get('App\Service\SpreadsheetService');
+        foreach ($extractedContent as $key => $workedHours) {
+
+            // Name
+            $content[$key][0] = $workedHours[0];
+
+            // Hours
+            array_shift($workedHours);
+            foreach ($workedHours as $nbOfHours) {
+                foreach($spreadsheetService->computeDailyDetails($nbOfHours) as $workedHoursDetails) {
+                    $content[$key][] = $workedHoursDetails;
+                }
+            }
+        }
+
+        return $this->render(
+            'export-confirm.html.twig',
+            [
+                'title' => 'page.title_export_confirm',
+                'content' => $content,
+                'tableDateHeader' => $tableDateHeader,
+                'column_name' => 'spreadsheet.column_name',
+                'subcolumn_in' => 'spreadsheet.column_in',
+                'subcolumn_out' => 'spreadsheet.column_out',
+                'subcolumn_break' => 'spreadsheet.column_break',
+                'subcolumn_total' => 'spreadsheet.column_total',
             ]
         );
     }
@@ -45,21 +105,26 @@ class DefaultController extends Controller
     public function export(Request $request, TranslatorInterface $translator)
     {
         $params = $request->request->all();
-        $params[] = $this->getParameter('hrp_domain');
 
         try {
-            $phantomjsService = new PhantomjsService($params);
-            $output = $phantomjsService->run($_SERVER['HRP_SIMULATE_REQUEST']);
-
-            $spreadsheetService = (new SpreadsheetService($translator))
+            $spreadsheetService = $this->get('App\Service\SpreadsheetService')
                 ->setCreator($params['username'])
                 ->setTitle(
                     $translator->trans('spreadsheet.title').' '.$params['year'].'-'.$params['month']
                 )
                 ->setCategory('HR')
                 ->setYear($params['year'])
-                ->setMonth($params['month'])
-                ->setContent($output);
+                ->setMonth($params['month']);
+
+            // prepare content
+            $content = [];
+            foreach ($params['employee'] as $employeeName => $employeeWorkDetails) {
+                $content[] = array_merge(
+                    [str_replace('_', ' ', $employeeName)],
+                    $employeeWorkDetails
+                );
+            }
+            $spreadsheetService->setContent($content);
             $spreadsheetService->generateSpreadsheet();
             $tmpFile = $spreadsheetService->writeSpreadsheetFile();
         } catch (\Exception $e) {
@@ -79,7 +144,7 @@ class DefaultController extends Controller
 
     /**
      * @param string $message
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     protected function returnError(string $message = '')
     {

@@ -34,7 +34,7 @@ class PhantomjsService
      * @throws \Exception
      * @return array
      */
-    public function run(bool $simulated = false)
+    public function run(bool $simulated = false) : array
     {
         $output = $this->getProcessOutput($simulated);
         $outputArray = json_decode($output, true);

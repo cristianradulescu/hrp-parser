@@ -284,20 +284,25 @@ class SpreadsheetService
     {
         // Rows #1 and #2 are used as header, start from row #3
         $cellStartIndex = 3;
+
         foreach ($this->content as $userRow) {
             // Name
             $name = array_shift($userRow);
             $activeSheet->setCellValue('A'.$cellStartIndex, $name);
 
-            // day entries
-            foreach ($userRow as $key => $value) {
-                // compute In / Out based on received number of worked hours
-                $dailyDetails = $this->computeDailyDetails((string)$value);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][0].$cellStartIndex, $dailyDetails[0]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][1].$cellStartIndex, $dailyDetails[1]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][2].$cellStartIndex, $dailyDetails[2]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][3].$cellStartIndex, $dailyDetails[3]);
+            // day entries - populate all 4 sub-columns of a day at once
+            $userDataKey = 0;
+            $columnGroupsKey = 1;
+            while ($userDataKey < count($userRow))  {
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][0].$cellStartIndex, $userRow[$userDataKey]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][1].$cellStartIndex, $userRow[$userDataKey+1]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][2].$cellStartIndex, $userRow[$userDataKey+2]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][3].$cellStartIndex, $userRow[$userDataKey+3]);
+
+                $userDataKey += 4;
+                $columnGroupsKey++;
             }
+
 
             $cellStartIndex++;
         }
@@ -307,7 +312,7 @@ class SpreadsheetService
      * @param string $workedHours
      * @return array
      */
-    protected function computeDailyDetails(string $workedHours)
+    public function computeDailyDetails(string $workedHours)
     {
         if ('8' !== $workedHours) {
             return ['-', '-', '-', $workedHours];
