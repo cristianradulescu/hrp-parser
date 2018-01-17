@@ -245,8 +245,14 @@ class SpreadsheetService
          * - Center vertically and horizontally
          * - Apply "Header text" style
          */
-        $nbOfDaysInMonth = (new \DateTime($this->year.'-'.$this->month.'-01'))->format('t');
-        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
+        $timekeepingService = new TimekeepingService();
+        $listOfDates = $timekeepingService->createListOfIntlDatesInMonth(
+            $this->year,
+            $this->month,
+            $_SERVER['LOCALE']
+        );
+
+        foreach ($listOfDates as $index => $date) {
             $activeSheet->mergeCells($this->dateColumnGroups[$index][0].'1:'.$this->dateColumnGroups[$index][3].'1')
                 ->getStyle($this->dateColumnGroups[$index][0].'1')
                 ->getAlignment()
@@ -254,9 +260,7 @@ class SpreadsheetService
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $activeSheet->setCellValue(
                 $this->dateColumnGroups[$index][0].'1',
-                $this->formatHeaderText(
-                    (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
-                )
+                $this->formatHeaderText($date)
             );
             $activeSheet->setCellValue(
                 $this->dateColumnGroups[$index][0].'2',
@@ -306,27 +310,5 @@ class SpreadsheetService
 
             $cellStartIndex++;
         }
-    }
-
-    /**
-     * @param string $workedHours
-     * @return array
-     */
-    public function computeDailyDetails(string $workedHours)
-    {
-        if ('8' !== $workedHours) {
-            return ['-', '-', '-', $workedHours];
-        }
-
-        // compute start and end hours, wih a difference between 7h48m and 8h17m, +1 h break
-        $startHour = new \DateTime($this->year.'-'.$this->month.'-01 08:'.rand(32, 59));
-        $endHour = (clone $startHour)->add(new \DateInterval('PT'.rand(8*60+48, 9*60+17).'M'));
-
-        return [
-            $startHour->format('H:i'),
-            $endHour->format('H:i'),
-            '1h',
-            $endHour->diff($startHour)->format('%hh%im')
-        ];
     }
 }

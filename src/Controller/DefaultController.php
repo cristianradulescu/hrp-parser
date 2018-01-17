@@ -60,18 +60,13 @@ class DefaultController extends Controller
                 $translator->trans('page.error').': '.$e->getMessage());
         }
 
-        $tableDateHeader = [];
-        $nbOfDaysInMonth = (new \DateTime($params['year'].'-'.$params['month'].'-01'))->format('t');
-        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
-            $tableDateHeader[] = (new \IntlDateFormatter(
-                $_SERVER['LOCALE'],
-                \IntlDateFormatter::MEDIUM,
-                \IntlDateFormatter::NONE)
-            )->format(new \DateTime($params['year'].'-'.$params['month'].'-'.$index));
-        }
-
+        $timekeepingService = $this->get('App\Service\TimekeepingService');
+        $tableDateHeader = $timekeepingService->createListOfIntlDatesInMonth(
+            $params['year'],
+            $params['month'],
+            $_SERVER['LOCALE']
+        );
         $content = [];
-        $spreadsheetService = $this->get('App\Service\SpreadsheetService');
         foreach ($extractedContent as $key => $workedHours) {
             // Name
             $content[$key][0] = $workedHours[0];
@@ -79,7 +74,7 @@ class DefaultController extends Controller
             // Hours
             array_shift($workedHours);
             foreach ($workedHours as $nbOfHours) {
-                foreach($spreadsheetService->computeDailyDetails($nbOfHours) as $workedHoursDetails) {
+                foreach($timekeepingService->computeDailyDetails($nbOfHours) as $workedHoursDetails) {
                     $content[$key][] = $workedHoursDetails;
                 }
             }
