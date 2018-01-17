@@ -47,6 +47,12 @@ class DefaultController extends Controller
 
         try {
             $extractedContent = $this->get('App\Service\PhantomjsService')
+                ->setUsername($params['username'])
+                ->setPassword($params['password'])
+                ->setCompanyId($params['company'])
+                ->setYear($params['year'])
+                ->setMonth($params['month'])
+                ->setDomain($this->getParameter('hrp_domain'))
                 ->run($_SERVER['HRP_SIMULATE_REQUEST']);
 
         } catch (\Exception $e) {
@@ -67,7 +73,6 @@ class DefaultController extends Controller
         $content = [];
         $spreadsheetService = $this->get('App\Service\SpreadsheetService');
         foreach ($extractedContent as $key => $workedHours) {
-
             // Name
             $content[$key][0] = $workedHours[0];
 

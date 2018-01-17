@@ -14,19 +14,115 @@ class PhantomjsService
     /**
      * @var string
      */
-    private $command;
+    private $username = '';
 
     /**
-     * Crawler constructor.
-     * @param array $parameters
+     * @var string
      */
-    function __construct(array $parameters = array())
+    private $password = '';
+
+    /**
+     * @var string
+     */
+    private $companyId = '';
+
+    /**
+     * @var int
+     */
+    private $year = 2017;
+
+    /**
+     * @var int
+     */
+    private $month = 1;
+
+    /**
+     * @var string
+     */
+    private $domain = '';
+
+    /**
+     * @return string
+     */
+    protected function getCommand()
     {
-        $parameters = implode(' ', $parameters);
-        $this->command = __DIR__.'/../../bin/phantomjs --cookies-file='
+        if ('' === $this->username || '' === $this->password || '' === $this->domain) {
+            throw new \InvalidArgumentException('Missing or invalid parameters for PhantomJS command');
+        }
+
+        return __DIR__.'/../../bin/phantomjs --cookies-file='
             .__DIR__.'/../../var/phcookies.txt '
             .'--ignore-ssl-errors=true '
-            .__DIR__.'/../Resources/phantomjs/script.js '.$parameters;
+            .__DIR__.'/../Resources/phantomjs/script.js '
+            .sprintf(
+                '%s %s %s %s %s %s',
+                $this->username,
+                $this->password,
+                $this->companyId,
+                $this->year,
+                $this->month,
+                $this->domain
+            );
+    }
+
+    /**
+     * @param string $username
+     * @return PhantomjsService
+     */
+    public function setUsername(string $username): PhantomjsService
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+    /**
+     * @param string $password
+     * @return PhantomjsService
+     */
+    public function setPassword(string $password): PhantomjsService
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    /**
+     * @param string $companyId
+     * @return PhantomjsService
+     */
+    public function setCompanyId(string $companyId): PhantomjsService
+    {
+        $this->companyId = $companyId;
+        return $this;
+    }
+
+    /**
+     * @param int $year
+     * @return PhantomjsService
+     */
+    public function setYear(int $year): PhantomjsService
+    {
+        $this->year = $year;
+        return $this;
+    }
+
+    /**
+     * @param int $month
+     * @return PhantomjsService
+     */
+    public function setMonth(int $month): PhantomjsService
+    {
+        $this->month = $month;
+        return $this;
+    }
+
+    /**
+     * @param string $domain
+     * @return PhantomjsService
+     */
+    public function setDomain(string $domain): PhantomjsService
+    {
+        $this->domain = $domain;
+        return $this;
     }
 
     /**
@@ -61,7 +157,7 @@ class PhantomjsService
             return file_get_contents(__DIR__.'/../Resources/response/hrp-success.json');
         }
 
-        $process = new Process($this->command);
+        $process = new Process($this->getCommand());
         $process->run();
 
         // executes after the command finishes
