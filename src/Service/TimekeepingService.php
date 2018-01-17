@@ -45,7 +45,7 @@ class TimekeepingService
         for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
             $list[$index] = (new \IntlDateFormatter(
                 $locale,
-                \IntlDateFormatter::NONE,
+                $datetype,
                 \IntlDateFormatter::NONE)
             )->format(new \DateTime($year . '-' . $month . '-' . $index));
         }
