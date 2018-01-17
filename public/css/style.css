@@ -1,3 +1,15 @@
 body {
     padding-top: 5rem;
 }
+
+table.table-export {
+    font-size: small;
+}
+
+tr.subcol th {
+    min-width: 4rem;
+}
+
+table.table td input {
+    font-size: .75rem;
+}

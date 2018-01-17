@@ -1,21 +1,6 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<style>
-    table.table-export {
-        font-size: small;
-    }
-
-     tr.subcol th {
-        min-width: 4rem;
-    }
-
-    table.table td input {
-        font-size: .75rem;
-    }
-
-</style>
-
 <form id="export-confirm-form" method="POST" action="{{ path('export') }}">
     <button type="submit" class="btn btn-primary btn-sm">Confirm</button><br /><br />
     <table class="table-export table table-striped table-bordered table-sm">
@@ -77,18 +62,8 @@
 
     <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
 </form>
+{% endblock %}
 
-
-<script>
-$('#chkbox-select-all').on('click', function() {
-    $("input[id^='chkbox-employee-']").attr("checked", $(this).is(':checked'));
-});
-
-$('form#export-confirm-form').on('submit', function(event) {
-    // console.log( $( this ).serializeArray() );
-    // event.preventDefault();
-})
-
-</script>
-
+{% block javascript %}
+<script src="js/export-confirm.js"></script>
 {% endblock %}
