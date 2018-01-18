@@ -245,8 +245,14 @@ class SpreadsheetService
          * - Center vertically and horizontally
          * - Apply "Header text" style
          */
-        $nbOfDaysInMonth = (new \DateTime($this->year.'-'.$this->month.'-01'))->format('t');
-        for ($index = 1; $index <= $nbOfDaysInMonth; $index++) {
+        $timekeepingService = new TimekeepingService();
+        $listOfDates = $timekeepingService->createListOfIntlDatesInMonth(
+            $this->year,
+            $this->month,
+            $_SERVER['LOCALE']
+        );
+
+        foreach ($listOfDates as $index => $date) {
             $activeSheet->mergeCells($this->dateColumnGroups[$index][0].'1:'.$this->dateColumnGroups[$index][3].'1')
                 ->getStyle($this->dateColumnGroups[$index][0].'1')
                 ->getAlignment()
@@ -254,9 +260,7 @@ class SpreadsheetService
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $activeSheet->setCellValue(
                 $this->dateColumnGroups[$index][0].'1',
-                $this->formatHeaderText(
-                    (new \DateTime($this->year.'-'.$this->month.'-'.$index))->format('D, d-M')
-                )
+                $this->formatHeaderText($date)
             );
             $activeSheet->setCellValue(
                 $this->dateColumnGroups[$index][0].'2',
@@ -284,44 +288,27 @@ class SpreadsheetService
     {
         // Rows #1 and #2 are used as header, start from row #3
         $cellStartIndex = 3;
+
         foreach ($this->content as $userRow) {
             // Name
             $name = array_shift($userRow);
             $activeSheet->setCellValue('A'.$cellStartIndex, $name);
 
-            // day entries
-            foreach ($userRow as $key => $value) {
-                // compute In / Out based on received number of worked hours
-                $dailyDetails = $this->computeDailyDetails((string)$value);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][0].$cellStartIndex, $dailyDetails[0]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][1].$cellStartIndex, $dailyDetails[1]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][2].$cellStartIndex, $dailyDetails[2]);
-                $activeSheet->setCellValue($this->dateColumnGroups[$key+1][3].$cellStartIndex, $dailyDetails[3]);
+            // day entries - populate all 4 sub-columns of a day at once
+            $userDataKey = 0;
+            $columnGroupsKey = 1;
+            while ($userDataKey < count($userRow))  {
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][0].$cellStartIndex, $userRow[$userDataKey]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][1].$cellStartIndex, $userRow[$userDataKey+1]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][2].$cellStartIndex, $userRow[$userDataKey+2]);
+                $activeSheet->setCellValue($this->dateColumnGroups[$columnGroupsKey][3].$cellStartIndex, $userRow[$userDataKey+3]);
+
+                $userDataKey += 4;
+                $columnGroupsKey++;
             }
+
 
             $cellStartIndex++;
         }
-    }
-
-    /**
-     * @param string $workedHours
-     * @return array
-     */
-    protected function computeDailyDetails(string $workedHours)
-    {
-        if ('8' !== $workedHours) {
-            return ['-', '-', '-', $workedHours];
-        }
-
-        // compute start and end hours, wih a difference between 7h48m and 8h17m, +1 h break
-        $startHour = new \DateTime($this->year.'-'.$this->month.'-01 08:'.rand(32, 59));
-        $endHour = (clone $startHour)->add(new \DateInterval('PT'.rand(8*60+48, 9*60+17).'M'));
-
-        return [
-            $startHour->format('H:i'),
-            $endHour->format('H:i'),
-            '1h',
-            $endHour->diff($startHour)->format('%hh%im')
-        ];
     }
 }

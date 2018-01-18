@@ -8,7 +8,7 @@ var username = system.args[1],
     year = system.args[4],
     month = system.args[5],
     domain = system.args[6],
-    timeout = 1000,
+    timeout = 500,
     token = '',
     pontaj = [];
 

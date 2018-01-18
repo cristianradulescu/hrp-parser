@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<form id="export-confirm-form" method="POST" action="{{ path('export') }}">
+    <button type="submit" class="btn btn-primary btn-sm">Confirm</button><br /><br />
+    <table class="table-export table table-striped table-bordered table-sm">
+
+        <thead>
+            <tr class="col">
+                <th rowspan="4">
+                    <input class="input" type="checkbox" value="" id="chkbox-select-all">
+                </th>
+            </tr>
+            <tr class="col">
+                <th rowspan="4">{{ column_name|trans }}</th>
+            </tr>
+            <tr class="col">
+                {% for dateHeader in tableDateHeader %}
+                    <th colspan="4">{{ dateHeader }}</th>
+                {% endfor %}
+
+            </tr>
+            <tr class="col subcol">
+                {% for dateHeader in tableDateHeader %}
+                    <th>{{ subcolumn_in|trans }}</th>
+                    <th>{{ subcolumn_out|trans }}</th>
+                    <th>{{ subcolumn_break|trans }}</th>
+                    <th>{{ subcolumn_total|trans }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for rows in content %}
+                <tr>
+                    <td>
+                        <input class="input" type="checkbox" value="" id="chkbox-employee-{{ loop.index }}">
+                    </td>
+                    {% for data in rows %}
+                            {% if loop.first %}
+                                {% set employeeName = data %}
+                                <th scope="row">{{ data }}</th>
+                            {% else %}
+                                <td data-toggle="tooltip" data-placement="left" title="{{ employeeName }}">
+                                    <input class="form-control form-control-sm"
+                                           type="text"
+                                           name="employee[{{ employeeName|replace({' ': '_'}) }}][{{ loop.index0 }}]"
+                                           value="{{ data }}">
+                                </td>
+                            {% endif %}
+
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    <input type="hidden" name="username" value="{{ app.request.request.get('username') }}" />
+    <input type="hidden" name="year" value="{{ app.request.request.get('year') }}" />
+    <input type="hidden" name="month" value="{{ app.request.request.get('month') }}" />
+
+    <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script src="js/export-confirm.js"></script>
+{% endblock %}

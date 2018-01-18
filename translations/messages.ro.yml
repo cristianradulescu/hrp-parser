@@ -1,5 +1,6 @@
 page:
-  title: 'Raport activitate angajati'
+  title_index: 'Raport activitate angajati'
+  title_export_confirm: 'Confirma/modifica raport'
   error: 'Eroare'
 
 form:

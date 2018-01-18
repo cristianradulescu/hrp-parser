@@ -1,5 +1,6 @@
 page:
-  title: 'Employee timekeeping report'
+  title_index: 'Employee timekeeping report'
+  title_export_confirm: 'Confirm/adjust report'
   error: 'Error'
 
 form:
