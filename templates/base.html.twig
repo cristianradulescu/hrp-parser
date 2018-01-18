@@ -1,36 +1,91 @@
 <!doctype html>
-<html lang="en">
+<html class="no-js" lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}{{ title|trans }}{% endblock %}</title>
+    <meta name="description" content="YOUR DESCRIPTION">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="YOUR APPLICATION AUTHOR">
+
     <link rel="shortcut icon" href="https://s1.emagst.net/layout/ro//favicon2.ico">
 
-    <title>{% block title %}{{ title|trans }}{% endblock %}</title>
+    <!-- The main stylesheet contains all the essential Bootstrap & eMAG Apps UI KIT styling -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="ui-kit/dist/css/main_style.min.css">
+    {% block stylesheet %}{% endblock %}
 
-    <!-- Bootstrap core CSS -->
-    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#">// {{ title|trans }}</a>
-</nav>
-
-<main role="main" class="container-fluid">
-    <div>
-        {% block body %}{% endblock %}
+<!-- HEADER:Start -->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <div class="nav-controls visible-xs-inline-block pull-left">
+                <button class="btn btn-default navbar-btn" id="toggle-sidebar-btn" type="button"><span class="sr-only">Toggle sidepanel</span><i class="fa fa-bars"></i></button>
+            </div>
+            <a class="navbar-brand" href="javascript:void(0)">
+                <i class="fa fa-group"></i>
+                <i class="fa fa-long-arrow-right"></i>
+                <i class="fa fa-file-excel-o"></i>
+            </a>
+            <div class="nav-controls visible-xs-inline-block pull-right">
+                <button class="btn btn-default navbar-btn" data-target="#test1_navbar" data-toggle="collapse" id="main-min-nav" type="button">
+                    <span class="sr-only">Toggle navigation</span><i class="fa fa-angle-down"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse navbar-collapse" id="test2_navbar">
+            <h4 class="navbar-text">{{ title|trans }}</h4>
+        </div>
     </div>
-</main><!-- /.container -->
+</nav>
+<!-- HEADER:End -->
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="bootstrap/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="bootstrap/assets/js/vendor/popper.min.js"></script>
-<script src="bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- PAGE:Start -->
+
+<div class="main-container" id="main-container">
+    <div class="main-container-inner">
+
+        <!-- SIDEBAR:Start -->
+        <!-- SIDEBAR:End -->
+
+        <!-- CONTENT:Start -->
+        <div class="main-content">
+            <div class="page-content">
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+        <!-- CONTENT:End -->
+
+        <!-- FOOTER:Start -->
+        <!-- FOOTER:End -->
+
+    </div>
+</div>
+
+<!-- PAGE:End -->
+
+<!-- POPUPS:Start -->
+<div id="pop_space"></div>
+<!-- POPUPS:End -->
+
+<!-- SCRIPTS:Start -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>window.jQuery || document.write("<script src=\"../dist/js/lib/jquery-1.11.3.min.js\">"+"<"+"/script>")</script>
+
+<!-- The main script file contains all the essential Bootstrap & eMAG Apps UI KIT utilities -->
+<script src="ui-kit/dist/js/main_script.min.js"></script>
 {% block javascript %}{% endblock %}
+<!-- SCRIPTS:End -->
+
+<!-- DOCUMENT-READY:Start -->
+<script type="text/javascript">
+    $(document).ready(function() {
+        console.log('Ready!');
+    });
+</script>
+<!-- DOCUMENT-READY:End -->
 </body>
 </html>

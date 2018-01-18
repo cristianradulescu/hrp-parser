@@ -17,11 +17,17 @@
         "symfony/translation": "^4.0",
         "symfony/twig-bundle": "^4.0",
         "symfony/yaml": "^4.0",
-        "twbs/bootstrap": "^4.0@beta"
+        "photon/power-ui-kit": "^1.5.0"
     },
     "require-dev": {
         "symfony/dotenv": "^4.0"
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/eMAGTechLabs/emag-apps-ui-kit.git"
+        }
+    ],
     "config": {
         "preferred-install": {
             "*": "dist"
@@ -49,9 +55,9 @@
         ],
         "post-update-cmd": [
             "@auto-scripts",
-            "@add-bootstrap"
+            "@add-ui-kit"
         ],
-        "add-bootstrap": "mkdir -p public/bootstrap; cp -r $(pwd)/vendor/twbs/bootstrap/dist/ public/bootstrap/dist; cp -r $(pwd)/vendor/twbs/bootstrap/assets/ public/bootstrap/assets;"
+        "add-ui-kit": "mkdir -p public/ui-kit; cp -r $(pwd)/vendor/photon/power-ui-kit/dist/ public/ui-kit/dist"
     },
     "conflict": {
         "symfony/symfony": "*"

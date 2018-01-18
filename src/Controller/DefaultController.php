@@ -39,6 +39,7 @@ class DefaultController extends Controller
      * @param Request $request
      * @param TranslatorInterface $translator
      * @return RedirectResponse|Response
+     * @throws \Exception
      */
     public function exportConfirm(Request $request, TranslatorInterface $translator)
     {
@@ -67,15 +68,15 @@ class DefaultController extends Controller
             $_SERVER['LOCALE']
         );
         $content = [];
-        foreach ($extractedContent as $key => $workedHours) {
-            // Name
-            $content[$key][0] = $workedHours[0];
+        foreach ($extractedContent as $workedHours) {
+            $name = $workedHours[0];
 
-            // Hours
+            // remove Name and compute the rest of daily details
             array_shift($workedHours);
-            foreach ($workedHours as $nbOfHours) {
+            foreach ($workedHours as $key => $nbOfHours) {
                 foreach($timekeepingService->computeDailyDetails($nbOfHours) as $workedHoursDetails) {
-                    $content[$key][] = $workedHoursDetails;
+                    if (!array_key_exists($key+1, $tableDateHeader)) continue;
+                    $content[$name][$tableDateHeader[$key+1]][] = $workedHoursDetails;
                 }
             }
         }
@@ -85,7 +86,6 @@ class DefaultController extends Controller
             [
                 'title' => 'page.title_export_confirm',
                 'content' => $content,
-                'tableDateHeader' => $tableDateHeader,
                 'column_name' => 'spreadsheet.column_name',
                 'subcolumn_in' => 'spreadsheet.column_in',
                 'subcolumn_out' => 'spreadsheet.column_out',

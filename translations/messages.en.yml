@@ -19,3 +19,5 @@ spreadsheet:
   column_out: 'Out'
   column_break: 'Break'
   column_total: 'Total'
+
+actions: 'Actions'

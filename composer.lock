@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "9f2b6255b3e4e70f61e05ac1cbe37fa8",
+    "content-hash": "a6648cdc6561df5730de813ba880d9e1",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -408,6 +408,60 @@
                 "parser"
             ],
             "time": "2014-09-09T13:34:57+00:00"
+        },
+        {
+            "name": "photon/power-ui-kit",
+            "version": "v1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/eMAGTechLabs/emag-apps-ui-kit.git",
+                "reference": "5cae44648296599b7df89a65816a67899097542c"
+            },
+            "type": "project",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "George Vlada",
+                    "email": "george.vlada@emag.ro"
+                },
+                {
+                    "name": "Valentin Bica",
+                    "email": "valentin.bica@emag.ro"
+                },
+                {
+                    "name": "Vlad Dusa",
+                    "email": "vlad.dusa@emag.ro"
+                },
+                {
+                    "name": "Eduard Stransky",
+                    "email": "eduard.stransky@emag.ro"
+                },
+                {
+                    "name": "Alexandru Breahna",
+                    "email": "alexandru.breahna@emag.ro"
+                },
+                {
+                    "name": "Ionut Vornicescu",
+                    "email": "ionut.vornicescu@emag.ro"
+                },
+                {
+                    "name": "Remus Joghiu",
+                    "email": "remus.joghiu@emag.ro"
+                },
+                {
+                    "name": "Marius Petrescu",
+                    "email": "marius.petrescu@emag.ro"
+                }
+            ],
+            "description": "eMAG Apps UI KIT for a better UX and UI.",
+            "keywords": [
+                "layout",
+                "ui",
+                "ux"
+            ],
+            "time": "2018-01-08T09:26:10+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",
@@ -2354,57 +2408,6 @@
             "time": "2018-01-03T07:38:00+00:00"
         },
         {
-            "name": "twbs/bootstrap",
-            "version": "v4.0.0-beta.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twbs/bootstrap.git",
-                "reference": "ced70da441d487efb8589acbff445d6b5fa68bb9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twbs/bootstrap/zipball/ced70da441d487efb8589acbff445d6b5fa68bb9",
-                "reference": "ced70da441d487efb8589acbff445d6b5fa68bb9",
-                "shasum": ""
-            },
-            "replace": {
-                "twitter/bootstrap": "self.version"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.3.x-dev"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jacob Thornton",
-                    "email": "jacobthornton@gmail.com"
-                },
-                {
-                    "name": "Mark Otto",
-                    "email": "markdotto@gmail.com"
-                }
-            ],
-            "description": "The most popular front-end framework for developing responsive, mobile first projects on the web.",
-            "homepage": "https://getbootstrap.com",
-            "keywords": [
-                "JS",
-                "css",
-                "framework",
-                "front-end",
-                "mobile-first",
-                "responsive",
-                "sass",
-                "web"
-            ],
-            "time": "2017-12-28T17:50:04+00:00"
-        },
-        {
             "name": "twig/twig",
             "version": "v2.4.4",
             "source": {
@@ -2533,8 +2536,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "symfony/lts": 20,
-        "twbs/bootstrap": 10
+        "symfony/lts": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

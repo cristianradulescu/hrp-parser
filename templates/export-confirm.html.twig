@@ -1,69 +1,86 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheet %}
+    <link rel="stylesheet" href="ui-kit/dist/plugins/jqgrid/ui.jqgrid.min.css">
+    <link rel="stylesheet" href="ui-kit/dist/plugins/drop/drop.min.css">
+{% endblock %}
+
 {% block body %}
-<form id="export-confirm-form" method="POST" action="{{ path('export') }}">
-    <button type="submit" class="btn btn-primary btn-sm">Confirm</button><br /><br />
-    <table class="table-export table table-striped table-bordered table-sm">
-
-        <thead>
-            <tr class="col">
-                <th rowspan="4">
-                    <input class="input" type="checkbox" value="" id="chkbox-select-all">
-                </th>
-            </tr>
-            <tr class="col">
-                <th rowspan="4">{{ column_name|trans }}</th>
-            </tr>
-            <tr class="col">
-                {% for dateHeader in tableDateHeader %}
-                    <th colspan="4">{{ dateHeader }}</th>
-                {% endfor %}
-
-            </tr>
-            <tr class="col subcol">
-                {% for dateHeader in tableDateHeader %}
-                    <th>{{ subcolumn_in|trans }}</th>
-                    <th>{{ subcolumn_out|trans }}</th>
-                    <th>{{ subcolumn_break|trans }}</th>
-                    <th>{{ subcolumn_total|trans }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for rows in content %}
-                <tr>
-                    <td>
-                        <input class="input" type="checkbox" value="" id="chkbox-employee-{{ loop.index }}">
-                    </td>
-                    {% for data in rows %}
-                            {% if loop.first %}
-                                {% set employeeName = data %}
-                                <th scope="row">{{ data }}</th>
-                            {% else %}
-                                <td data-toggle="tooltip" data-placement="left" title="{{ employeeName }}">
-                                    <input class="form-control form-control-sm"
-                                           type="text"
-                                           name="employee[{{ employeeName|replace({' ': '_'}) }}][{{ loop.index0 }}]"
-                                           value="{{ data }}">
-                                </td>
-                            {% endif %}
-
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
-
-    <input type="hidden" name="username" value="{{ app.request.request.get('username') }}" />
-    <input type="hidden" name="year" value="{{ app.request.request.get('year') }}" />
-    <input type="hidden" name="month" value="{{ app.request.request.get('month') }}" />
-
-    <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
-</form>
+    <table id="export-confirm-table" class="table table-bordered word-break"></table>
+    <div id="export-confirm-pager"></div>
 {% endblock %}
 
 {% block javascript %}
-<script src="js/export-confirm.js"></script>
+    <script src="ui-kit/dist/plugins/jqgrid/i18n/grid.locale-{{ app.request.defaultLocale }}.js"></script>
+    <script src="ui-kit/dist/plugins/jqgrid/jquery.jqGrid.min.js"></script>
+    <script src="ui-kit/dist/plugins/stickyKit/stickyKit.min.js"></script>
+    <script src="ui-kit/dist/plugins/tether/tether.min.js"></script>
+    <script src="ui-kit/dist/plugins/drop/drop.min.js"></script>
+
+    <script type="text/javascript">
+        function getListingDummyData() {
+
+            var dataSet = [
+                {% for employeeName,timekeepDetails in content %}
+                {
+                    "id": "{{ loop.index }}",
+                    "name": "{{ employeeName }}",
+                    {% for date,dayDetails in timekeepDetails %}
+                    "date_{{ date|replace({' ': ''}) }}_in": "{{ timekeepDetails[date][0] }}",
+                    "date_{{ date|replace({' ': ''}) }}_out": "{{ timekeepDetails[date][1] }}",
+                    "date_{{ date|replace({' ': ''}) }}_break": "{{ timekeepDetails[date][2] }}",
+                    "date_{{ date|replace({' ': ''}) }}_total": "{{ timekeepDetails[date][3] }}",
+                    {% endfor %}
+                },
+                {% endfor %}
+            ];
+
+            return dataSet;
+        }
+
+        $(document).ready(function () {
+            var listingParameters = {
+                table: '#export-confirm-table',
+                pager: '#export-confirm-pager',
+                datatype: 'jsonstring',
+                caption: 'Report',
+                datastr: getListingDummyData(),
+                multiselect: true,
+                shrinkToFit: false,
+                sortable: false,
+                colModel: [
+                    {
+                        label: '{{ 'actions'|trans }}',
+                        name: 'actions',
+                        width: 60,
+                        formatter: 'actions',
+                        formatoptions: {
+                            keys: true,
+                            delbutton: false
+                        }
+                    },
+                    { name: 'id', index: 'id', key: true, hidden: true, width: "20" },
+                    { label: '{{ column_name|trans }}', name: 'name', index: 'name', width: "150", editable: false },
+                    {% set timekeepDetails = content|first %}
+                    {% for date,dayDetails in timekeepDetails %}
+                    { label: '{{ subcolumn_in|trans }}', name: 'date_{{ date|replace({' ': ''}) }}_in', index: 'date_{{ date|replace({' ': ''}) }}_in', width: "70", editable: true },
+                    { label: '{{ subcolumn_out|trans }}', name: 'date_{{ date|replace({' ': ''}) }}_out', index: 'date_{{ date|replace({' ': ''}) }}_out', width: "70", editable: true },
+                    { label: '{{ subcolumn_break|trans }}', name: 'date_{{ date|replace({' ': ''}) }}_break', index: 'date_{{ date|replace({' ': ''}) }}_break', width: "50", editable: true },
+                    { label: '{{ subcolumn_total|trans }}', name: 'date_{{ date|replace({' ': ''}) }}_total', index: 'date_{{ date|replace({' ': ''}) }}_total', width: "70", editable: true },
+                    {% endfor %}
+                ]
+            };
+
+            new PhotonJqGrid(listingParameters).init();
+
+            $("#export-confirm-table").jqGrid('setGroupHeaders', {
+                useColSpanStyle: false,
+                groupHeaders:[
+                    {% for date,dayDetails in timekeepDetails %}
+                    {startColumnName: 'date_{{ date|replace({' ': ''}) }}_in', numberOfColumns: 4, titleText: '{{ date }}' },
+                    {% endfor %}
+                ]
+            });
+        });
+    </script>
 {% endblock %}
