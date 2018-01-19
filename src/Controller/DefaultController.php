@@ -92,53 +92,9 @@ class DefaultController extends Controller
                 'subcolumn_out' => 'spreadsheet.column_out',
                 'subcolumn_break' => 'spreadsheet.column_break',
                 'subcolumn_total' => 'spreadsheet.column_total',
-            ]
-        );
-    }
-
-    /**
-     * @Route("/export", name="export", methods={"POST"})
-     *
-     * @param Request $request
-     * @param TranslatorInterface $translator
-     * @return RedirectResponse|Response
-     */
-    public function export(Request $request, TranslatorInterface $translator)
-    {
-        $params = $request->request->all();
-
-        try {
-            $spreadsheetService = $this->get('App\Service\SpreadsheetService')
-                ->setCreator($params['username'])
-                ->setTitle(
-                    $translator->trans('spreadsheet.title').' '.$params['year'].'-'.$params['month']
-                )
-                ->setCategory('HR')
-                ->setYear($params['year'])
-                ->setMonth($params['month']);
-
-            // prepare content
-            $content = [];
-            foreach ($params['employee'] as $employeeName => $employeeWorkDetails) {
-                $content[] = array_merge(
-                    [str_replace('_', ' ', $employeeName)],
-                    $employeeWorkDetails
-                );
-            }
-            $spreadsheetService->setContent($content);
-            $spreadsheetService->generateSpreadsheet();
-            $tmpFile = $spreadsheetService->writeSpreadsheetFile();
-        } catch (\Exception $e) {
-            return $this->returnError(
-                $translator->trans('page.error').': '.$e->getMessage());
-        }
-
-        return new Response(
-            file_get_contents($tmpFile),
-            200,
-            [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => 'attachment; filename="'.$spreadsheetService->getFilename().'"'
+                'export_button' => 'export_to_excel',
+                'export_filename' => $params['username'].'-'.$params['year'].'-'.$params['month'].'_'
+                    .(new \DateTime())->format('YmdHis').'.xlsx'
             ]
         );
     }

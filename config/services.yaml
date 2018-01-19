@@ -29,9 +29,6 @@ services:
     App\Service\TimekeepingService:
       public: true
 
-    App\Service\SpreadsheetService:
-      public: true
-
     # controllers are imported separately to make sure they
     # have the tag that allows actions to type-hint services
     App\Controller\:

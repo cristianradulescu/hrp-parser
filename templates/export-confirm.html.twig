@@ -6,8 +6,14 @@
 {% endblock %}
 
 {% block body %}
+    <div class="pad-top-20 pad-btm-20">
+        <button type="button" class="btn btn-primary export">{{ export_button|trans }}</button>
+    </div>
     <table id="export-confirm-table" class="table table-bordered word-break"></table>
     <div id="export-confirm-pager"></div>
+    <div class="pad-top-20">
+        <button type="button" class="btn btn-primary export">{{ export_button|trans }}</button>
+    </div>
 {% endblock %}
 
 {% block javascript %}
@@ -16,6 +22,7 @@
     <script src="ui-kit/dist/plugins/stickyKit/stickyKit.min.js"></script>
     <script src="ui-kit/dist/plugins/tether/tether.min.js"></script>
     <script src="ui-kit/dist/plugins/drop/drop.min.js"></script>
+    <script type="text/javascript" language="javascript" src="js/jszip.min.js"></script>
 
     <script type="text/javascript">
         function getListingDummyData() {
@@ -57,7 +64,8 @@
                         formatoptions: {
                             keys: true,
                             delbutton: false
-                        }
+                        },
+                        exportcol: false
                     },
                     { name: 'id', index: 'id', key: true, hidden: true, width: "20" },
                     { label: '{{ column_name|trans }}', name: 'name', index: 'name', width: "150", editable: false },
@@ -72,7 +80,6 @@
             };
 
             new PhotonJqGrid(listingParameters).init();
-
             $("#export-confirm-table").jqGrid('setGroupHeaders', {
                 useColSpanStyle: false,
                 groupHeaders:[
@@ -81,6 +88,12 @@
                     {% endfor %}
                 ]
             });
+            $("button.export").on('click', function(){
+                console.log('Exporting table into file: {{ export_filename }}')
+                $("#export-confirm-table").jqGrid('exportToExcel', {
+                    fileName : '{{ export_filename }}'
+                })
+            })
         });
     </script>
 {% endblock %}

@@ -21,3 +21,4 @@ spreadsheet:
   column_total: 'Total'
 
 actions: 'Actions'
+export_to_excel: 'Export to Excel'
