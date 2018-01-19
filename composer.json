@@ -51,7 +51,7 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
-            "@add-bootstrap"
+            "@add-ui-kit"
         ],
         "post-update-cmd": [
             "@auto-scripts",
