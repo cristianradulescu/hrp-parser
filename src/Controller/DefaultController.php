@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Translation\TranslatorInterface;
 
 class DefaultController extends Controller
@@ -140,6 +141,24 @@ class DefaultController extends Controller
                 'Content-Disposition' => 'attachment; filename="'.$spreadsheetService->getFilename().'"'
             ]
         );
+    }
+
+    /**
+     * @Route("/export-demo", name="export-demo")
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function exportDemo(Request $request)
+    {
+        $request->setMethod(Request::METHOD_POST);
+        $request->request->set('username', 'cristian');
+        $request->request->set('password', 'notthepasswordhaha');
+        $request->request->set('company', '123-123');
+        $request->request->set('year', 2017);
+        $request->request->set('month', 11);
+
+        return $this->forward('App\Controller\DefaultController:exportConfirm');
     }
 
     /**
