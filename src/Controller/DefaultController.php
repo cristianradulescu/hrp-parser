@@ -7,7 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\Translation\TranslatorInterface;
 
 class DefaultController extends Controller
@@ -82,6 +81,11 @@ class DefaultController extends Controller
             }
         }
 
+        $allowDataReset = $_SERVER['ALLOW_DATA_RESET'];
+        if ($allowDataReset) {
+            $this->get('snc_redis.default')->set('content-' . $params['username'], json_encode($content));
+        }
+
         return $this->render(
             'export-confirm.html.twig',
             [
@@ -94,7 +98,8 @@ class DefaultController extends Controller
                 'subcolumn_total' => 'spreadsheet.column_total',
                 'export_button' => 'export_to_excel',
                 'export_filename' => $params['username'].'-'.$params['year'].'-'.$params['month'].'_'
-                    .(new \DateTime())->format('YmdHis').'.xlsx'
+                    .(new \DateTime())->format('YmdHis').'.xlsx',
+                'allow_data_reset' => $allowDataReset
             ]
         );
     }
