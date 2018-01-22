@@ -7,12 +7,56 @@
 
 {% block body %}
     <div class="pad-top-20 pad-btm-20">
-        <button type="button" class="btn btn-primary export">{{ export_button|trans }}</button>
+        <button type="button" class="btn btn-success export">{{ export_button|trans }}</button>
+        <button type="button" class="btn btn-primary shift" data-toggle="modal" data-target="#shift-popup">Schimba tura</button>
     </div>
     <table id="export-confirm-table" class="table table-bordered word-break"></table>
     <div id="export-confirm-pager"></div>
     <div class="pad-top-20">
-        <button type="button" class="btn btn-primary export">{{ export_button|trans }}</button>
+        <button type="button" class="btn btn-success export">{{ export_button|trans }}</button>
+    </div>
+
+{% endblock %}
+
+{% block modal %}
+    <div class="modal fade" id="shift-popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><i class="fa fa-remove"></i></span></button>
+                    <h4 class="modal-title" id="shift-popup-label">Modifica ture</h4>
+                </div>
+                <div class="modal-body">
+                    <label>Ziua</label>
+                    <div class="input-group">
+                        <select class="form-control">
+                            {% for employeeName,timekeepDetails in content %}
+                                {% for date,dayDetails in timekeepDetails %}
+                                <option value="{{ date }}">{{ date }}</option>
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <label>Ora start</label>
+                    <div class="input-group col-xs-4">
+                        <input type="text" class="form-control" name="bootstrap_time" id="bootstrap_time" aria-describedby="basic-addon3">
+                        <div class="input-group-addon cursor-pointer" id="basic-addon3"><i class="fa fa-clock-o"></i></div>
+                    </div>
+
+                    <label>Durata (ore tura)</label>
+                    <div class="input-group col-xs-2">
+                        <input type="text" class="form-control" value="8">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right panel-controls">
+                        <button class="btn btn-success" data-dismiss="modal"><span>OK</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -23,6 +67,9 @@
     <script src="ui-kit/dist/plugins/tether/tether.min.js"></script>
     <script src="ui-kit/dist/plugins/drop/drop.min.js"></script>
     <script type="text/javascript" language="javascript" src="js/jszip.min.js"></script>
+    <script src="ui-kit/dist/plugins/datetimepicker/moment.2.10.6.min.js"></script>
+    <script src="ui-kit/dist/plugins/datetimepicker/bootstrap-datetimepicker.4.17.37.min.js"></script>
+    <script src="ui-kit/dist/plugins/datetimepicker/locales/bootstrap-datetimepicker.min.{{ app.request.defaultLocale }}.js"></script>
 
     <script type="text/javascript">
         function getListingDummyData() {
@@ -93,7 +140,17 @@
                 $("#export-confirm-table").jqGrid('exportToExcel', {
                     fileName : '{{ export_filename }}'
                 })
-            })
+            });
+
+
+            $('#shift-popup').on('hidden.bs.modal', function (e) {
+                $(this).find('.modal-dialog').attr('class', 'modal-dialog');
+            });
+
+            $('#bootstrap_time').datetimepicker({format : 'HH:mm'})
+                .next().on('click', function() {
+                $(this).prev().focus();
+            });
         });
     </script>
 {% endblock %}
