@@ -15,9 +15,11 @@ RUN apt-get install -y fontconfig
 RUN apt-get install -y libzip-dev \
   && pecl install zip && docker-php-ext-enable zip
 
-
 RUN apt-get update -y && apt-get install -y libpng-dev \
   && docker-php-ext-install gd
+
+RUN pecl install redis \
+  && docker-php-ext-enable redis
 
 COPY php-fpm.conf /etc/php-fpm.conf
 COPY php.ini /usr/local/etc/php/php.ini

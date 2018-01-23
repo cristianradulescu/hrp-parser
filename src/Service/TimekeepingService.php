@@ -11,6 +11,7 @@ class TimekeepingService
     /**
      * @param string $workedHours
      * @return array
+     * @throws \Exception
      */
     public function computeDailyDetails(string $workedHours)
     {

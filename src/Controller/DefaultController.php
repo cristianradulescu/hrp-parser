@@ -39,6 +39,7 @@ class DefaultController extends Controller
      * @param Request $request
      * @param TranslatorInterface $translator
      * @return RedirectResponse|Response
+     * @throws \Exception
      */
     public function exportConfirm(Request $request, TranslatorInterface $translator)
     {
@@ -67,17 +68,22 @@ class DefaultController extends Controller
             $_SERVER['LOCALE']
         );
         $content = [];
-        foreach ($extractedContent as $key => $workedHours) {
-            // Name
-            $content[$key][0] = $workedHours[0];
+        foreach ($extractedContent as $workedHours) {
+            $name = $workedHours[0];
 
-            // Hours
+            // remove Name and compute the rest of daily details
             array_shift($workedHours);
-            foreach ($workedHours as $nbOfHours) {
+            foreach ($workedHours as $key => $nbOfHours) {
                 foreach($timekeepingService->computeDailyDetails($nbOfHours) as $workedHoursDetails) {
-                    $content[$key][] = $workedHoursDetails;
+                    if (!array_key_exists($key+1, $tableDateHeader)) continue;
+                    $content[$name][$tableDateHeader[$key+1]][] = $workedHoursDetails;
                 }
             }
+        }
+
+        $allowDataReset = $_SERVER['ALLOW_DATA_RESET'];
+        if ($allowDataReset) {
+            $this->get('snc_redis.default')->set('content-' . $params['username'], json_encode($content));
         }
 
         return $this->render(
@@ -85,61 +91,35 @@ class DefaultController extends Controller
             [
                 'title' => 'page.title_export_confirm',
                 'content' => $content,
-                'tableDateHeader' => $tableDateHeader,
                 'column_name' => 'spreadsheet.column_name',
                 'subcolumn_in' => 'spreadsheet.column_in',
                 'subcolumn_out' => 'spreadsheet.column_out',
                 'subcolumn_break' => 'spreadsheet.column_break',
                 'subcolumn_total' => 'spreadsheet.column_total',
+                'export_button' => 'export_to_excel',
+                'export_filename' => $params['username'].'-'.$params['year'].'-'.$params['month'].'_'
+                    .(new \DateTime())->format('YmdHis').'.xlsx',
+                'allow_data_reset' => $allowDataReset
             ]
         );
     }
 
     /**
-     * @Route("/export", name="export", methods={"POST"})
+     * @Route("/export-demo", name="export-demo")
      *
      * @param Request $request
-     * @param TranslatorInterface $translator
-     * @return RedirectResponse|Response
+     * @return Response
      */
-    public function export(Request $request, TranslatorInterface $translator)
+    public function exportDemo(Request $request)
     {
-        $params = $request->request->all();
+        $request->setMethod(Request::METHOD_POST);
+        $request->request->set('username', 'cristian');
+        $request->request->set('password', 'notthepasswordhaha');
+        $request->request->set('company', '123-123');
+        $request->request->set('year', 2017);
+        $request->request->set('month', 11);
 
-        try {
-            $spreadsheetService = $this->get('App\Service\SpreadsheetService')
-                ->setCreator($params['username'])
-                ->setTitle(
-                    $translator->trans('spreadsheet.title').' '.$params['year'].'-'.$params['month']
-                )
-                ->setCategory('HR')
-                ->setYear($params['year'])
-                ->setMonth($params['month']);
-
-            // prepare content
-            $content = [];
-            foreach ($params['employee'] as $employeeName => $employeeWorkDetails) {
-                $content[] = array_merge(
-                    [str_replace('_', ' ', $employeeName)],
-                    $employeeWorkDetails
-                );
-            }
-            $spreadsheetService->setContent($content);
-            $spreadsheetService->generateSpreadsheet();
-            $tmpFile = $spreadsheetService->writeSpreadsheetFile();
-        } catch (\Exception $e) {
-            return $this->returnError(
-                $translator->trans('page.error').': '.$e->getMessage());
-        }
-
-        return new Response(
-            file_get_contents($tmpFile),
-            200,
-            [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => 'attachment; filename="'.$spreadsheetService->getFilename().'"'
-            ]
-        );
+        return $this->forward('App\Controller\DefaultController:exportConfirm');
     }
 
     /**

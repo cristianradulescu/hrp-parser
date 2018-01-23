@@ -19,3 +19,6 @@ spreadsheet:
   column_out: 'Out'
   column_break: 'Break'
   column_total: 'Total'
+
+actions: 'Actions'
+export_to_excel: 'Export to Excel'

@@ -19,3 +19,6 @@ spreadsheet:
   column_out: 'Iesire'
   column_break: 'Pauza'
   column_total: 'Total'
+
+actions: 'Actiuni'
+export_to_excel: 'Exporta in Excel'

@@ -5,3 +5,10 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+/public/ui-kit/
+
+###> symfony/phpunit-bridge ###
+.phpunit
+/phpunit.xml
+###< symfony/phpunit-bridge ###
