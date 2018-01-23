@@ -77,7 +77,7 @@
     <script src="ui-kit/dist/plugins/datetimepicker/locales/bootstrap-datetimepicker.min.{{ app.request.defaultLocale }}.js"></script>
 
     <script type="text/javascript">
-        function getListingDummyData() {
+        function getListingData() {
 
             var dataSet = [
                 {% for employeeName,timekeepDetails in content %}
@@ -103,7 +103,7 @@
                 pager: '#export-confirm-pager',
                 datatype: 'jsonstring',
                 caption: 'Report',
-                datastr: getListingDummyData(),
+                datastr: getListingData(),
                 multiselect: true,
                 shrinkToFit: false,
                 sortable: false,
